@@ -1,7 +1,18 @@
-import { Elysia } from "elysia";
+import { Elysia } from 'elysia'
+import { swagger } from '@elysiajs/swagger'
+import { opentelemetry } from '@elysiajs/opentelemetry'
 
-const app = new Elysia().get("/", () => "Hello Elysia").listen(3000);
+import { note } from './note'
+import { user } from './user'
 
-console.log(
-  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
-);
+const app = new Elysia()
+    .use(opentelemetry())
+    .use(swagger())
+    .onError(({ error, code }) => {
+        if (code === 'NOT_FOUND') return 'Not Found :('
+
+        console.error(error)
+    })
+    .use(user)
+    .use(note)
+    .listen(3000)
